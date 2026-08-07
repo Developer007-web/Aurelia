@@ -200,13 +200,6 @@ Aurelia simplifies this by bringing everything together into one AI-powered plat
 
 - GitHub: https://github.com/Developer007-web
 - LinkedIn: https://www.linkedin.com/in/aman-pratap-singh/
-- Portfolio: *Coming Soon*
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
 
 ---
 
