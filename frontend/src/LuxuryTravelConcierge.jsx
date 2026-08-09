@@ -300,24 +300,6 @@ function Tag({ children, tone = "gold" }) {
   );
 }
 
-function FormSectionLabel({ children }) {
-  return (
-    <div
-      style={{
-        fontFamily: "'Fraunces', serif",
-        fontSize: 14.5,
-        color: C.gold,
-        letterSpacing: 0.3,
-        margin: "26px 0 14px",
-        paddingBottom: 8,
-        borderBottom: `1px solid rgba(212,175,55,.18)`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
 function Field({ label, children }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 7, fontSize: 12, color: "rgba(248,246,242,.55)", fontFamily: "'Inter', sans-serif" }}>
@@ -347,7 +329,7 @@ function blurRing(e) { e.target.style.borderColor = "rgba(255,255,255,.1)"; }
    ============================================================ */
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-function DatePicker({ value, onChange, label = "Date of Birth", minYearsAhead = false }) {
+function DatePicker({ value, onChange, label = "Date", minYearsAhead = false }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(() => {
     if (value) return new Date(value);
@@ -571,6 +553,7 @@ function DayStub({ day, title, active, onClick }) {
 }
 
 /* Passport-style circular stamp for visa/currency */
+// eslint-disable-next-line no-unused-vars
 function Stamp({ label, value }) {
   return (
     <div
@@ -609,7 +592,7 @@ const SAMPLE = {
     "Candlelit dinner on Jimbaran Bay",
     "Traditional Balinese purification ceremony at Tirta Empul",
   ],
-  budget: { total: 250000, flights: 55000, hotels: 78000, food: 32000, localTransport: 14000, activities: 38000, shopping: 18000, buffer: 15000 },
+  budget: { total: 250000, flights: 55000, hotels: 78000, food: 32000, localTransport: 14000, activities: 38000, shopping: 18000, buffer: 12000 },
   hotels: [
     { name: "Villa Kayu Ubud", rating: "5-star boutique", price: "₹22,000/night", why: "Secluded jungle villa with private pool, ideal for a slow, romantic pace", nearby: "Tegalalang Rice Terrace, Ubud Palace", priority: "Book first — limited villas" },
     { name: "The Kayana Seminyak", rating: "5-star", price: "₹19,500/night", why: "Adults-only sanctuary, steps from Seminyak's best beach clubs", nearby: "Double-Six Beach, La Plancha", priority: "Book within 2 weeks" },
@@ -633,6 +616,15 @@ const SAMPLE = {
   },
   scores: { Budget: 82, Luxury: 91, Adventure: 74, Comfort: 95, Safety: 88, Food: 93 },
   overall: 90,
+  happeningEvents: {
+    source: "unavailable",
+    query: "events in Bali",
+    googleSearchUrl: "https://www.google.com/search?q=events%20in%20Bali",
+    live: [],
+    seasonal: [
+      { title: "Bali Arts Festival, Denpasar", when: "Typically June", venue: "Bali", note: "Month-long celebration of Balinese arts & dance" },
+    ],
+  },
 };
 
 const ITINERARY_DAYS = [
@@ -650,24 +642,12 @@ const ITINERARY_DAYS = [
    ============================================================ */
 const TRIP_TYPES = ["Solo", "Couple", "Family", "Friends", "Business"];
 const TRAVEL_STYLES = ["Luxury", "Premium", "Budget", "Backpacking"];
-const PACES = ["Relaxed", "Balanced", "Fast"];
 const INTERESTS = ["Adventure","Beaches","Nature","Mountains","Food","Nightlife","Shopping","Culture","Photography","Wildlife","Spiritual","Road Trips","Snow"];
 const CURATED_DESTINATIONS = ["Delhi","Mumbai","Goa","Jaipur","Udaipur","Manali","Shimla","Leh-Ladakh","Rishikesh","Munnar, Kerala","Agra","Bali, Indonesia"];
 
 function shakeKeyframe() {
   return "@keyframes shakeX { 10%,90%{transform:translateX(-1px)} 20%,80%{transform:translateX(2px)} 30%,50%,70%{transform:translateX(-4px)} 40%,60%{transform:translateX(4px)} }";
 }
-
-const MIN_AGE = 17; // "greater than 16"
-const TRANSPORT_MODES = [
-  { value: "Flight", icon: "✈️", hint: "Fastest for long distances" },
-  { value: "Train", icon: "🚆", hint: "Scenic & budget-friendly" },
-  { value: "Private Driver / Car", icon: "🚘", hint: "Door-to-door comfort" },
-  { value: "Self-Drive Rental", icon: "🚙", hint: "Full flexibility" },
-  { value: "Bus", icon: "🚌", hint: "Most economical" },
-  { value: "Cruise", icon: "🚢", hint: "For coastal/island routes" },
-  { value: "Bike / Scooter", icon: "🏍️", hint: "Best for short local hops" },
-];
 
 function IntakeForm({ onSubmit, loading }) {
   const [form, setForm] = useState({
@@ -680,40 +660,28 @@ function IntakeForm({ onSubmit, loading }) {
     travelStyle: "Luxury",
     budget: 250000,
     days: 7,
-    month: "July",
     interests: ["Beaches", "Food", "Culture", "Photography"],
-    foodPreference: "No preference",
-    transport: "Private Driver / Car",
-    accommodation: "Boutique villas",
-    passportCountry: "India",
-    pace: "Relaxed",
   });
 
   const [destError, setDestError] = useState(false);
-  const [ageError, setAgeError] = useState(false);
+  const [dateError, setDateError] = useState(false);
   const [shake, setShake] = useState(false);
 
   const toggleInterest = (i) =>
     setForm((f) => ({ ...f, interests: f.interests.includes(i) ? f.interests.filter((x) => x !== i) : [...f.interests, i] }));
 
-  function handleAgeChange(v) {
-    setForm((f) => ({ ...f, age: v }));
-    if (v !== "" && Number(v) >= MIN_AGE) setAgeError(false);
-  }
-
   function handleSubmitClick() {
-    const ageInvalid = form.age === "" || form.age == null || Number(form.age) < MIN_AGE;
-    const destInvalid = !form.destination || !form.destination.trim();
-
-    if (destInvalid || ageInvalid) {
-      setDestError(destInvalid);
-      setAgeError(ageInvalid);
+    const missingDest = !form.destination || !form.destination.trim();
+    const missingDate = !form.tripDate || !form.tripDate.trim();
+    if (missingDest || missingDate) {
+      setDestError(missingDest);
+      setDateError(missingDate);
       setShake(true);
       setTimeout(() => setShake(false), 500);
       return;
     }
     setDestError(false);
-    setAgeError(false);
+    setDateError(false);
     onSubmit(form);
   }
 
@@ -722,48 +690,26 @@ function IntakeForm({ onSubmit, loading }) {
       <GlassCard style={{ maxWidth: 900, margin: "0 auto", boxShadow: "0 25px 70px rgba(0,0,0,.4)" }}>
         <SectionHeader icon="🧭" title="Plan Your Escape" subtitle="Tell us about the traveler — we'll design everything around them." />
 
-        <FormSectionLabel>Traveler Details</FormSectionLabel>
-        <div className="intake-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-          <div style={{ animation: shake && ageError ? "shakeX .5s" : "none" }}>
-            <Field label="Age — must be over 16">
-              <input
-                style={{ ...inputStyle, borderColor: ageError ? C.danger : "rgba(255,255,255,.1)" }}
-                onFocus={focusRing}
-                onBlur={blurRing}
-                type="number"
-                min={MIN_AGE}
-                max={120}
-                placeholder="e.g. 28"
-                value={form.age}
-                onChange={(e) => handleAgeChange(e.target.value)}
-              />
-            </Field>
-            {ageError && (
-              <span style={{ color: C.danger, fontSize: 11, marginTop: 4, display: "block" }}>
-                Age must be greater than 16 to book this trip.
-              </span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+          <Field label="Age">
+            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" min={1} max={120} value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
+          </Field>
+          <div style={{ animation: shake && dateError ? "shakeX .5s" : "none" }}>
+            <DatePicker
+              value={form.tripDate}
+              onChange={(v) => { setDateError(false); setForm({ ...form, tripDate: v }); }}
+              label="Trip Start Date — required"
+              minYearsAhead
+            />
+            {dateError && (
+              <span style={{ color: C.danger, fontSize: 11, marginTop: 2, display: "block" }}>Please pick a trip start date.</span>
             )}
           </div>
-          <Field label="Number of Travelers">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" min={1} value={form.travelers} onChange={(e) => setForm({ ...form, travelers: e.target.value })} />
-          </Field>
-          <Field label="Trip Type">
-            <select style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.tripType} onChange={(e) => setForm({ ...form, tripType: e.target.value })}>
-              {TRIP_TYPES.map((t) => <option key={t} style={{ background: "#131A28" }}>{t}</option>)}
-            </select>
-          </Field>
-          <Field label="Passport / Visa Country">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.passportCountry} onChange={(e) => setForm({ ...form, passportCountry: e.target.value })} />
-          </Field>
-        </div>
-
-        <FormSectionLabel>Trip Details</FormSectionLabel>
-        <div className="intake-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
           <Field label="Departure City">
             <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.departureCity} onChange={(e) => setForm({ ...form, departureCity: e.target.value })} />
           </Field>
-          <div style={{ animation: shake && destError ? "shakeX .5s" : "none" }}>
-            <Field label="Destination — required">
+          <Field label="Destination — required">
+            <div style={{ animation: shake ? "shakeX .5s" : "none" }}>
               <input
                 style={{ ...inputStyle, borderColor: destError ? C.danger : "rgba(255,255,255,.1)" }}
                 onFocus={(e) => { setDestError(false); focusRing(e); }}
@@ -776,84 +722,43 @@ function IntakeForm({ onSubmit, loading }) {
               <datalist id="curated-destinations">
                 {CURATED_DESTINATIONS.map((d) => <option key={d} value={d} />)}
               </datalist>
-            </Field>
+            </div>
             {destError && (
-              <span style={{ color: C.danger, fontSize: 11, marginTop: 4, display: "block" }}>Please tell us where you're headed.</span>
+              <span style={{ color: C.danger, fontSize: 11, marginTop: 2 }}>Please tell us where you're headed.</span>
             )}
-            <span style={{ fontSize: 10.5, color: "rgba(248,246,242,.35)", marginTop: 4, display: "block" }}>
+            <span style={{ fontSize: 10.5, color: "rgba(248,246,242,.35)", marginTop: 2 }}>
               Real, verified data available for: {CURATED_DESTINATIONS.join(" · ")}
             </span>
-          </div>
-          <DatePicker value={form.tripDate} onChange={(v) => setForm({ ...form, tripDate: v })} label="Trip Start Date" minYearsAhead />
-          <Field label="Number of Days">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" min={1} value={form.days} onChange={(e) => setForm({ ...form, days: e.target.value })} />
           </Field>
-          <Field label="Preferred Travel Month">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} />
+          <Field label="Number of Travelers">
+            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" min={1} value={form.travelers} onChange={(e) => setForm({ ...form, travelers: e.target.value })} />
           </Field>
-          <Field label="Total Budget (₹)">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" min={0} value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+          <Field label="Trip Type">
+            <select style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.tripType} onChange={(e) => setForm({ ...form, tripType: e.target.value })}>
+              {TRIP_TYPES.map((t) => <option key={t} style={{ background: "#131A28" }}>{t}</option>)}
+            </select>
           </Field>
-        </div>
-
-        <FormSectionLabel>How You Want to Travel</FormSectionLabel>
-        <div style={{ marginBottom: 4 }}>
-          <div style={{ fontSize: 10.5, color: "rgba(248,246,242,.55)", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Mode of Transport</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
-            {TRANSPORT_MODES.map((t) => {
-              const active = form.transport === t.value;
-              return (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setForm({ ...form, transport: t.value })}
-                  style={{
-                    textAlign: "left",
-                    padding: "12px 14px",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    border: `1px solid ${active ? C.gold : "rgba(255,255,255,.1)"}`,
-                    background: active ? "rgba(212,175,55,.14)" : "rgba(255,255,255,.03)",
-                    transition: "all .2s cubic-bezier(.34,1.56,.64,1)",
-                  }}
-                >
-                  <div style={{ fontSize: 18, marginBottom: 4 }}>{t.icon}</div>
-                  <div style={{ fontSize: 12.5, color: active ? C.gold : C.ivory, fontWeight: active ? 600 : 500 }}>{t.value}</div>
-                  <div style={{ fontSize: 10.5, color: "rgba(248,246,242,.4)", marginTop: 2 }}>{t.hint}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="intake-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 18 }}>
           <Field label="Travel Style">
             <select style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.travelStyle} onChange={(e) => setForm({ ...form, travelStyle: e.target.value })}>
               {TRAVEL_STYLES.map((t) => <option key={t} style={{ background: "#131A28" }}>{t}</option>)}
             </select>
           </Field>
-          <Field label="Pace">
-            <select style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.pace} onChange={(e) => setForm({ ...form, pace: e.target.value })}>
-              {PACES.map((t) => <option key={t} style={{ background: "#131A28" }}>{t}</option>)}
-            </select>
+          <Field label="Total Budget (₹)">
+            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
           </Field>
-          <Field label="Food Preference">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.foodPreference} onChange={(e) => setForm({ ...form, foodPreference: e.target.value })} />
-          </Field>
-          <Field label="Accommodation Preference">
-            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} value={form.accommodation} onChange={(e) => setForm({ ...form, accommodation: e.target.value })} />
+          <Field label="Number of Days">
+            <input style={inputStyle} onFocus={focusRing} onBlur={blurRing} type="number" min={1} value={form.days} onChange={(e) => setForm({ ...form, days: e.target.value })} />
           </Field>
         </div>
 
-        <FormSectionLabel>Interests</FormSectionLabel>
-        <div style={{ marginTop: -6 }}>
+        <div style={{ marginTop: 22 }}>
+          <div style={{ fontSize: 10.5, color: "rgba(248,246,242,.55)", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Interests</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {INTERESTS.map((i) => {
               const active = form.interests.includes(i);
               return (
                 <button
                   key={i}
-                  type="button"
                   onClick={() => toggleInterest(i)}
                   style={{
                     padding: "8px 15px",
@@ -922,7 +827,7 @@ function IntakeForm({ onSubmit, loading }) {
    ============================================================ */
 function BudgetRow({ label, amount, total, delay }) {
   const [ref, visible] = useReveal();
-  const pct = Math.round((amount / total) * 100);
+  const pct = Math.min(Math.round((amount / total) * 100), 100);
   return (
     <div ref={ref} style={{ marginBottom: 15 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13.5, color: C.ivory, marginBottom: 5 }}>
@@ -942,9 +847,10 @@ function ResultsPage({ form, onBack, plan }) {
   const days = plan?.itinerary || ITINERARY_DAYS;
   const spentKeys = ["flights","hotels","food","localTransport","activities","shopping","buffer"];
   const spent = spentKeys.reduce((a, k) => a + d.budget[k], 0);
-  const utilization = Math.round((spent / d.budget.total) * 100);
-  const remaining = d.budget.total - spent;
+  const utilization = Math.min(Math.round((spent / d.budget.total) * 100), 100);
+  const remaining = Math.max(d.budget.total - spent, 0);
   const currentDay = days.find((x) => x.day === activeDay);
+  const overBudget = !!d.budget.overBudget;
 
   return (
     <div style={{ maxWidth: 1080, margin: "0 auto" }}>
@@ -993,68 +899,86 @@ function ResultsPage({ form, onBack, plan }) {
       <Reveal delay={80}>
         <GlassCard style={{ marginBottom: 26 }}>
           <SectionHeader icon="💰" title="Budget Breakdown" />
+          {overBudget && (
+            <div style={{ background: "rgba(214,80,80,.1)", border: `1px solid ${C.danger}55`, borderRadius: 10, padding: "12px 16px", marginBottom: 18, fontSize: 13, color: C.ivory }}>
+              <div>⚠ The recommended hotel alone (₹{d.budget.hotels.toLocaleString("en-IN")}) exceeds your total budget by ₹{d.budget.shortfall.toLocaleString("en-IN")}. Raise your budget, pick a more affordable travel style, or check budget-friendly stays below.</div>
+              {d.hotelBookingLinks && (
+                <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                  <a href={d.hotelBookingLinks.oyo} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 11.5, color: C.gold, border: `1px solid ${C.gold}55`, borderRadius: 7, padding: "6px 12px", textDecoration: "none", fontWeight: 600 }}>
+                    Find budget rooms on OYO →
+                  </a>
+                  <a href={d.hotelBookingLinks.mmt} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 11.5, color: C.jade, border: `1px solid ${C.jade}55`, borderRadius: 7, padding: "6px 12px", textDecoration: "none", fontWeight: 600 }}>
+                    Compare stays on MakeMyTrip →
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 30 }}>
             <div>
               <BudgetRow label="Flights" amount={d.budget.flights} total={d.budget.total} delay={0} />
               <BudgetRow label="Hotels" amount={d.budget.hotels} total={d.budget.total} delay={60} />
               <BudgetRow label="Food" amount={d.budget.food} total={d.budget.total} delay={120} />
-              <BudgetRow label="Local Transport" amount={d.budget.localTransport} total={d.budget.total} delay={180} />
+              <BudgetRow label="Travel Inside the City" amount={d.budget.localTransport} total={d.budget.total} delay={180} />
               <BudgetRow label="Activities" amount={d.budget.activities} total={d.budget.total} delay={240} />
               <BudgetRow label="Shopping" amount={d.budget.shopping} total={d.budget.total} delay={300} />
               <BudgetRow label="Emergency Buffer" amount={d.budget.buffer} total={d.budget.total} delay={360} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <div style={{ fontSize: 10, color: "rgba(248,246,242,.45)", textTransform: "uppercase", letterSpacing: 1 }}>Total Budget</div>
+                <div style={{ fontSize: 10, color: "rgba(248,246,242,.45)", textTransform: "uppercase", letterSpacing: 1 }}>Total Cost</div>
                 <div style={{ fontSize: 34, color: C.gold, fontFamily: "'Fraunces', serif", marginTop: 4 }}><CountUp to={d.budget.total} prefix="₹" /></div>
               </div>
               <div>
-                <div style={{ fontSize: 10, color: "rgba(248,246,242,.45)", textTransform: "uppercase", letterSpacing: 1 }}>
-                  {remaining >= 0 ? "Unallocated" : "Over Budget"}
-                </div>
-                <div style={{ fontSize: 22, color: remaining >= 0 ? C.jade : C.danger, fontFamily: "'Fraunces', serif", marginTop: 4 }}>
-                  <CountUp to={Math.abs(remaining)} prefix="₹" />
-                </div>
+                <div style={{ fontSize: 10, color: "rgba(248,246,242,.45)", textTransform: "uppercase", letterSpacing: 1 }}>Remaining</div>
+                <div style={{ fontSize: 22, color: C.jade, fontFamily: "'Fraunces', serif", marginTop: 4 }}><CountUp to={remaining} prefix="₹" /></div>
               </div>
-              <AnimatedBar pct={Math.min(utilization, 100)} label="Budget Allocated" color={utilization > 100 ? C.danger : C.gold} />
-              <div style={{ fontSize: 11, color: "rgba(248,246,242,.4)", lineHeight: 1.5 }}>
-                Every rupee of your ₹{d.budget.total.toLocaleString("en-IN")} budget is split across the categories on the left — nothing is left unaccounted for.
-              </div>
+              <AnimatedBar pct={utilization} label="Utilization" />
             </div>
           </div>
         </GlassCard>
       </Reveal>
 
-      {/* Flights — boarding pass */}
+      {/* Flights — boarding pass, or a "no flight needed" note for same-city trips */}
       <Reveal delay={100}>
         <GlassCard style={{ marginBottom: 26 }}>
           <SectionHeader icon="✈" title="Flight Recommendation" />
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <BoardingPass
-              badge="Departure"
-              from={d.flight?.fromCity || form?.departureCity || "Delhi"}
-              to={d.flight?.toCity || d.tripName.split(" ")[0]}
-              fromCode={d.flight?.fromCode || "DEL"}
-              toCode={d.flight?.toCode || "—"}
-              airline={d.flight?.country && d.flight.country !== "India" ? "International carrier · connection likely" : "Domestic carrier · direct or 1-stop"}
-              duration={d.flight?.country && d.flight.country !== "India" ? "6–9h (with connection)" : "1h 30m – 3h"}
-              cls="Premium Economy"
-            />
-            <BoardingPass
-              badge="Return"
-              from={d.flight?.toCity || d.tripName.split(" ")[0]}
-              to={d.flight?.fromCity || form?.departureCity || "Delhi"}
-              fromCode={d.flight?.toCode || "—"}
-              toCode={d.flight?.fromCode || "DEL"}
-              airline={d.flight?.country && d.flight.country !== "India" ? "International carrier · connection likely" : "Domestic carrier · direct or 1-stop"}
-              duration={d.flight?.country && d.flight.country !== "India" ? "6–9h (with connection)" : "1h 30m – 3h"}
-              cls="Premium Economy"
-            />
-          </div>
-          <div style={{ marginTop: 18, display: "flex", gap: 30, flexWrap: "wrap", fontSize: 12.5, color: "rgba(248,246,242,.6)" }}>
-            <div><b style={{ color: C.ivory }}>Best time to book:</b> 6–8 weeks before departure</div>
-            <div><b style={{ color: C.ivory }}>Transfer tip:</b> Pre-book a private villa transfer from DPS</div>
-          </div>
+          {d.flight === null ? (
+            <div style={{ fontSize: 13.5, color: "rgba(248,246,242,.65)", padding: "6px 2px" }}>
+              🚗 Your departure city and destination are the same — no flight needed. That budget share has been put toward the rest of your trip instead.
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <BoardingPass
+                  badge="Departure"
+                  from={d.flight?.fromCity || form?.departureCity || "Delhi"}
+                  to={d.flight?.toCity || d.tripName.split(" ")[0]}
+                  fromCode={d.flight?.fromCode || "DEL"}
+                  toCode={d.flight?.toCode || "—"}
+                  airline={d.flight?.country && d.flight.country !== "India" ? "International carrier · connection likely" : "Domestic carrier · direct or 1-stop"}
+                  duration={d.flight?.country && d.flight.country !== "India" ? "6–9h (with connection)" : "1h 30m – 3h"}
+                  cls="Premium Economy"
+                />
+                <BoardingPass
+                  badge="Return"
+                  from={d.flight?.toCity || d.tripName.split(" ")[0]}
+                  to={d.flight?.fromCity || form?.departureCity || "Delhi"}
+                  fromCode={d.flight?.toCode || "—"}
+                  toCode={d.flight?.fromCode || "DEL"}
+                  airline={d.flight?.country && d.flight.country !== "India" ? "International carrier · connection likely" : "Domestic carrier · direct or 1-stop"}
+                  duration={d.flight?.country && d.flight.country !== "India" ? "6–9h (with connection)" : "1h 30m – 3h"}
+                  cls="Premium Economy"
+                />
+              </div>
+              <div style={{ marginTop: 18, display: "flex", gap: 30, flexWrap: "wrap", fontSize: 12.5, color: "rgba(248,246,242,.6)" }}>
+                <div><b style={{ color: C.ivory }}>Best time to book:</b> 6–8 weeks before departure</div>
+                <div><b style={{ color: C.ivory }}>Transfer tip:</b> Pre-book a private villa transfer from DPS</div>
+              </div>
+            </>
+          )}
         </GlassCard>
       </Reveal>
 
@@ -1066,18 +990,45 @@ function ResultsPage({ form, onBack, plan }) {
             {d.hotels.map((h, i) => (
               <div
                 key={h.name}
-                style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 14, padding: 17, background: "rgba(255,255,255,.02)", transition: "all .3s cubic-bezier(.16,1,.3,1)" }}
+                style={{
+                  border: `1px solid ${h.allocated ? C.gold : "rgba(255,255,255,.1)"}`,
+                  borderRadius: 14,
+                  padding: 17,
+                  background: h.allocated ? "rgba(212,175,55,.06)" : "rgba(255,255,255,.02)",
+                  transition: "all .3s cubic-bezier(.16,1,.3,1)",
+                  position: "relative",
+                }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = i % 2 ? C.jade : C.gold; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,.1)"; e.currentTarget.style.transform = "translateY(0)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = h.allocated ? C.gold : "rgba(255,255,255,.1)"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                {h.allocated && (
+                  <div style={{ position: "absolute", top: -10, left: 14, fontSize: 9.5, letterSpacing: 1, textTransform: "uppercase", background: C.gold, color: "#1a1710", padding: "2px 8px", borderRadius: 6, fontWeight: 600 }}>
+                    {h.source === "oyo-mmt-estimate" ? "Budget pick — via OYO / MMT" : "Allocated for your budget"}
+                  </div>
+                )}
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: h.allocated ? 6 : 0 }}>
                   <div style={{ color: C.ivory, fontWeight: 500, fontSize: 15.5, fontFamily: "'Fraunces', serif" }}>{h.name}</div>
                   <div style={{ color: C.gold, fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }}>{h.price}</div>
                 </div>
                 <Tag tone={i % 2 ? "jade" : "gold"}>{h.rating}</Tag>
                 <div style={{ fontSize: 12.5, color: "rgba(248,246,242,.6)", marginTop: 7 }}>{h.why}</div>
                 <div style={{ fontSize: 11.5, color: "rgba(248,246,242,.4)", marginTop: 7 }}>Near: {h.nearby}</div>
-                <div style={{ fontSize: 11.5, color: C.rose, marginTop: 5 }}>{h.priority}</div>
+                {h.stayCost != null && (
+                  <div style={{ fontSize: 11.5, color: "rgba(248,246,242,.4)", marginTop: 3 }}>Full stay: ₹{h.stayCost.toLocaleString("en-IN")}</div>
+                )}
+                <div style={{ fontSize: 11.5, color: h.allocated ? C.jade : C.rose, marginTop: 5 }}>{h.allocated ? h.priority : `Alternate — ${h.priority}`}</div>
+                {h.bookingLinks && (
+                  <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                    <a href={h.bookingLinks.oyo} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 11, color: C.gold, border: `1px solid ${C.gold}55`, borderRadius: 7, padding: "5px 10px", textDecoration: "none" }}>
+                      View live prices on OYO →
+                    </a>
+                    <a href={h.bookingLinks.mmt} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 11, color: C.jade, border: `1px solid ${C.jade}55`, borderRadius: 7, padding: "5px 10px", textDecoration: "none" }}>
+                      View live prices on MakeMyTrip →
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -1116,6 +1067,9 @@ function ResultsPage({ form, onBack, plan }) {
                   <div style={{ color: C.rose, fontSize: 11, marginBottom: 9, textTransform: "uppercase", letterSpacing: 1.2 }}>Details</div>
                   <div style={{ fontSize: 13, color: C.ivory }}>{currentDay.shopping}</div>
                   <div style={{ fontSize: 13, color: C.ivory, marginTop: 9 }}>Est. spend — <span style={{ color: C.gold, fontFamily: "'JetBrains Mono', monospace" }}>₹{currentDay.spend.toLocaleString("en-IN")}</span></div>
+                  {currentDay.localTravel != null && (
+                    <div style={{ fontSize: 13, color: C.ivory, marginTop: 5 }}>🛺 Getting around today — <span style={{ color: C.jade, fontFamily: "'JetBrains Mono', monospace" }}>₹{currentDay.localTravel.toLocaleString("en-IN")}</span></div>
+                  )}
                   <div style={{ fontSize: 11.5, color: "rgba(248,246,242,.4)", marginTop: 9 }}>📍 {currentDay.map}</div>
                 </div>
               </div>
@@ -1154,20 +1108,69 @@ function ResultsPage({ form, onBack, plan }) {
         </GlassCard>
       </Reveal>
 
-      {/* Currency + Visa — passport stamps */}
-      <Reveal delay={100}>
-        <GlassCard style={{ marginBottom: 26 }}>
-          <SectionHeader icon="📑" title="Currency & Visa" accent={C.jade} />
-          <div style={{ display: "flex", gap: 26, alignItems: "center", flexWrap: "wrap" }}>
-            <Stamp label="Rate" value="1₹≈190IDR" />
-            <Stamp label="Visa" value="On Arrival" />
-            <Stamp label="Stay" value="30 Days" />
-            <div style={{ flex: 1, minWidth: 220, fontSize: 13, color: "rgba(248,246,242,.65)", lineHeight: 1.7 }}>
-              Indonesian Rupiah (IDR) is the local currency; cards are widely accepted in hotels and restaurants, with ATMs plentiful across Ubud and Seminyak. Indian passport holders receive Visa on Arrival — passport valid 6+ months, a return ticket, and a USD 35 fee.
+      {/* Happening Nearby — optional, not baked into the day-by-day plan */}
+      {d.happeningEvents && (
+        <Reveal delay={100}>
+          <GlassCard style={{ marginBottom: 26 }}>
+            <SectionHeader icon="🎪" title="Happening Nearby (Optional)" />
+            <div style={{ fontSize: 12, color: "rgba(248,246,242,.5)", marginBottom: 16 }}>
+              Not part of your day-by-day plan — just worth checking before you go.
             </div>
-          </div>
-        </GlassCard>
-      </Reveal>
+
+            {d.happeningEvents.live?.length > 0 && (
+              <div style={{ marginBottom: d.happeningEvents.seasonal?.length ? 20 : 0 }}>
+                <div style={{ color: C.gold, fontSize: 11, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.2 }}>
+                  Live results for your dates
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                  {d.happeningEvents.live.map((ev, i) => (
+                    <a
+                      key={i}
+                      href={ev.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ textDecoration: "none", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, padding: 14, display: "block" }}
+                    >
+                      <div style={{ color: C.ivory, fontSize: 14, fontFamily: "'Fraunces', serif" }}>{ev.title}</div>
+                      <div style={{ color: C.gold, fontSize: 12, marginTop: 5 }}>{ev.when}</div>
+                      <div style={{ color: "rgba(248,246,242,.5)", fontSize: 11.5, marginTop: 3 }}>📍 {ev.venue}</div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {d.happeningEvents.seasonal?.length > 0 && (
+              <div>
+                <div style={{ color: C.jade, fontSize: 11, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.2 }}>
+                  Recurring around this time of year
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                  {d.happeningEvents.seasonal.map((ev, i) => (
+                    <div key={i} style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, padding: 14 }}>
+                      <div style={{ color: C.ivory, fontSize: 14, fontFamily: "'Fraunces', serif" }}>{ev.title}</div>
+                      <div style={{ color: C.jade, fontSize: 12, marginTop: 5 }}>{ev.when}</div>
+                      {ev.note && <div style={{ color: "rgba(248,246,242,.5)", fontSize: 11.5, marginTop: 3 }}>{ev.note}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(!d.happeningEvents.live || d.happeningEvents.live.length === 0) &&
+              (!d.happeningEvents.seasonal || d.happeningEvents.seasonal.length === 0) && (
+                <div style={{ fontSize: 13, color: "rgba(248,246,242,.6)" }}>
+                  {d.happeningEvents.source === "unavailable"
+                    ? "Live event search isn't configured on this backend yet (add a SERPAPI_KEY to enable it — see backend/liveEvents.js)."
+                    : "No specific listings found for your dates."}{" "}
+                  <a href={d.happeningEvents.googleSearchUrl} target="_blank" rel="noopener noreferrer" style={{ color: C.gold }}>
+                    Search what's on →
+                  </a>
+                </div>
+              )}
+          </GlassCard>
+        </Reveal>
+      )}
 
       {/* Final Score */}
       <Reveal delay={100}>
@@ -1242,10 +1245,6 @@ export default function LuxuryTravelConcierge() {
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
         select option { color: #F8F6F2; }
         input:focus, select:focus, button:focus-visible { outline: 2px solid ${C.gold}; outline-offset: 2px; }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { opacity: 1; }
-        @media (max-width: 640px) {
-          .intake-grid { grid-template-columns: 1fr !important; }
-        }
       `}</style>
 
       <AmbientField />
